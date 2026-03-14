@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyber Intrusion Intelligence Console</title>
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap");
+
+:root {
+    --bg-a: #f8f6ef;
+    --bg-b: #e7f0f4;
+    --bg-c: #fffaf3;
+    --surface: rgba(255, 255, 255, 0.8);
+    --surface-strong: #ffffff;
+    --border: #d5e1e8;
+    --ink: #16243a;
+    --muted: #5b6d82;
+    --accent: #0b7f8f;
+    --accent-strong: #055864;
+    --accent-soft: #dff4f6;
+    --warm: #f0834f;
+    --ok: #2f9d63;
+    --warn: #d28b2d;
+    --danger: #c94a43;
+    --radius-xl: 24px;
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --shadow: 0 20px 45px rgba(21, 46, 80, 0.12);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--ink);
+    font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+    background:
+        radial-gradient(circle at 0% 0%, #d8edf4 0%, transparent 30%),
+        radial-gradient(circle at 100% 0%, #ffe6cf 0%, transparent 25%),
+        linear-gradient(150deg, var(--bg-a), var(--bg-b) 45%, var(--bg-c));
+    position: relative;
+    overflow-x: hidden;
+}
+
+body::before,
+body::after {
+    content: "";
+    position: fixed;
+    border-radius: 999px;
+    filter: blur(5px);
+    z-index: -1;
+}
+
+body::before {
+    width: 280px;
+    height: 280px;
+    background: rgba(11, 127, 143, 0.16);
+    top: -70px;
+    right: -90px;
+}
+
+body::after {
+    width: 220px;
+    height: 220px;
+    background: rgba(240, 131, 79, 0.17);
+    bottom: -80px;
+    left: -70px;
+}
+
+.dashboard {
+    width: min(1200px, 95vw);
+    margin: 28px auto 46px;
+    display: grid;
+    gap: 18px;
+}
+
+.hero,
+.panel {
+    background: var(--surface);
+    backdrop-filter: blur(6px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
+}
+
+.hero {
+    padding: 30px clamp(20px, 4vw, 38px);
+    overflow: hidden;
+    position: relative;
+}
+
+.hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, rgba(11, 127, 143, 0.04), rgba(240, 131, 79, 0.08));
+    pointer-events: none;
+}
+
+.hero h1 {
+    margin: 0;
+    font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+    font-size: clamp(1.6rem, 2.7vw, 2.35rem);
+    letter-spacing: 0.02em;
+}
+
+.hero p {
+    margin: 10px 0 0;
+    color: var(--muted);
+    max-width: 76ch;
+    line-height: 1.55;
+}
+
+.hero-meta {
+    margin-top: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.meta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    border-radius: 999px;
+    background: var(--surface-strong);
+    border: 1px solid var(--border);
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.meta-pill b {
+    color: var(--ink);
+    font-weight: 600;
+}
+
+.panel {
+    padding: clamp(18px, 2.7vw, 28px);
+}
+
+.mode-toggle {
+    display: inline-grid;
+    grid-template-columns: 1fr 1fr;
+    background: #edf3f6;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px;
+    gap: 4px;
+}
+
+.mode-toggle button {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 10px 18px;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+}
+
+.mode-toggle button.active {
+    background: var(--surface-strong);
+    color: var(--ink);
+    box-shadow: 0 6px 16px rgba(18, 33, 56, 0.13);
+}
+
+.section-title {
+    margin: 0;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 1.3rem;
+}
+
+.section-subtitle {
+    margin: 8px 0 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.input-data-grid {
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.input-data-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-strong);
+    padding: 12px;
+}
+
+.input-data-label {
+    color: var(--muted);
+    font-size: 0.82rem;
+}
+
+.input-data-value {
+    margin-top: 6px;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.feature-list-box {
+    margin-top: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: #f8fbfd;
+    padding: 12px;
+}
+
+.feature-list-box summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--ink);
+    font-family: "Space Grotesk", sans-serif;
+}
+
+.feature-tags {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    max-height: 210px;
+    overflow: auto;
+}
+
+.feature-tag {
+    background: #eef5f9;
+    border: 1px solid #d3e2ec;
+    color: #30465f;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    padding: 5px 10px;
+}
+
+.toolbar {
+    margin: 16px 0 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.search {
+    min-width: 210px;
+    flex: 1;
+    max-width: 360px;
+}
+
+.search input {
+    width: 100%;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    background: var(--surface-strong);
+    color: var(--ink);
+}
+
+.btn {
+    border: 0;
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+}
+
+.btn.primary {
+    background: linear-gradient(120deg, var(--accent), var(--accent-strong));
+    color: #ffffff;
+}
+
+.btn.primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.btn.ghost {
+    background: #f2f7fa;
+    color: var(--ink);
+    border: 1px solid var(--border);
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.feature-item {
+    padding: 11px 12px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-strong);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.feature-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(21, 46, 80, 0.08);
+}
+
+.feature-item label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 7px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.feature-item input {
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid #cfdbe4;
+    padding: 9px 10px;
+    color: var(--ink);
+    background: #fbfdff;
+}
+
+.form-footer {
+    margin-top: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.note {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.alert {
+    margin-top: 14px;
+    border-radius: var(--radius-md);
+    padding: 11px 13px;
+    border: 1px solid #efc3bf;
+    background: #fff2f1;
+    color: #90342f;
+    font-size: 0.92rem;
+}
+
+.result-wrap {
+    margin-top: 18px;
+    display: grid;
+    gap: 14px;
+}
+
+.decision {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background: var(--surface-strong);
+    padding: 16px;
+}
+
+.decision .eyebrow {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.decision h3 {
+    margin: 6px 0 0;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 1.3rem;
+}
+
+.decision-note {
+    margin: 12px 0 0;
+    color: var(--muted);
+    line-height: 1.45;
+    font-size: 0.93rem;
+}
+
+.chips {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chip {
+    border-radius: 999px;
+    padding: 7px 11px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    border: 1px solid transparent;
+}
+
+.chip.neutral {
+    background: #f0f5f8;
+    border-color: var(--border);
+    color: var(--ink);
+}
+
+.chip.ok {
+    background: #e7f7ef;
+    color: #206c46;
+    border-color: #bfe9d2;
+}
+
+.chip.warn {
+    background: #fff4e4;
+    color: #8a5a12;
+    border-color: #ffd8a5;
+}
+
+.chip.danger {
+    background: #feecec;
+    color: #922f2a;
+    border-color: #f5b8b4;
+}
+
+.model-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.model-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-strong);
+    padding: 12px;
+}
+
+.model-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: baseline;
+    margin-bottom: 8px;
+}
+
+.model-name {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+}
+
+.model-label {
+    color: var(--muted);
+    font-size: 0.88rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.meter {
+    position: relative;
+    height: 9px;
+    border-radius: 999px;
+    background: #edf3f7;
+    overflow: hidden;
+}
+
+.meter > span {
+    position: absolute;
+    inset: 0;
+    width: 0;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--accent), var(--warm));
+}
+
+.csv-toolbar {
+    margin-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.filters-bar {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.filter-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: #f3f8fb;
+    color: var(--ink);
+    font-size: 0.88rem;
+}
+
+.filter-pill input[type="checkbox"] {
+    margin: 0;
+}
+
+.filter-pill select,
+.filter-pill input[type="text"] {
+    border-radius: 8px;
+    border: 1px solid #cfdbe4;
+    padding: 7px 9px;
+    background: #ffffff;
+    color: var(--ink);
+    font-size: 0.86rem;
+    min-width: 130px;
+}
+
+.file-picker {
+    position: relative;
+    border: 1px dashed #bdd0db;
+    background: #f5fafc;
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    color: var(--muted);
+    min-width: 250px;
+    max-width: 420px;
+    flex: 1;
+}
+
+.file-picker input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.summary-grid {
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.summary-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-strong);
+    padding: 12px;
+}
+
+.summary-title {
+    color: var(--muted);
+    font-size: 0.82rem;
+}
+
+.summary-value {
+    margin-top: 5px;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.table-wrap {
+    margin-top: 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--surface-strong);
+}
+
+.empty-state {
+    padding: 22px 14px;
+    color: var(--muted);
+    text-align: center;
+}
+
+.technical-details {
+    max-width: 420px;
+}
+
+.technical-details summary {
+    cursor: pointer;
+    color: #2f5578;
+    font-size: 0.84rem;
+    font-weight: 600;
+}
+
+.technical-details-content {
+    margin-top: 8px;
+    color: #425b74;
+    font-size: 0.82rem;
+    line-height: 1.4;
+}
+
+.meaning-text {
+    color: #3f566e;
+    font-size: 0.88rem;
+    max-width: 360px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+}
+
+th,
+td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #e4edf3;
+    text-align: left;
+}
+
+th {
+    background: #eef5f9;
+    color: #2c4058;
+    font-weight: 600;
+    font-family: "Space Grotesk", sans-serif;
+    letter-spacing: 0.01em;
+}
+
+tr:last-child td {
+    border-bottom: 0;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.78rem;
+}
+
+.badge.safe {
+    background: #e7f7ef;
+    color: #206c46;
+}
+
+.badge.warning {
+    background: #fff4e4;
+    color: #8a5a12;
+}
+
+.badge.attack {
+    background: #feecec;
+    color: #922f2a;
+}
+
+.pagination {
+    margin-top: 12px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.reveal {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.delay-1 {
+    animation-delay: 0.1s;
+}
+
+.delay-2 {
+    animation-delay: 0.18s;
+}
+
+@keyframes rise {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .reveal {
+        animation: rise 0.55s ease;
+    }
+}
+
+@media (max-width: 1100px) {
+    .features-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .input-data-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .summary-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 820px) {
+    .features-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .model-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .filters-bar {
+        align-items: stretch;
+    }
+
+    .filter-pill {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .pagination {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 560px) {
+    .dashboard {
+        width: min(1200px, 96vw);
+        margin-top: 16px;
+        margin-bottom: 24px;
+    }
+
+    .features-grid,
+    .input-data-grid,
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .mode-toggle {
+        width: 100%;
+    }
+
+    .mode-toggle button {
+        padding: 10px 8px;
+        font-size: 0.9rem;
+    }
+}
+</style>
+</head>
+<body>
+<main class="dashboard">
+    <header class="hero reveal">
+        <h1>Cyber Intrusion Intelligence Console</h1>
+        <p>
+            Run single-event detection or analyze full CSV datasets using an ensemble of
+            Random Forest, XGBoost, and two Graph Attention Network models.
+        </p>
+        <div class="hero-meta">
+            <span class="meta-pill"><b>{{ feature_count }}</b> Required Features</span>
+            <span class="meta-pill"><b>4</b> Model Votes</span>
+            <span class="meta-pill"><b>Real-Time</b> Consensus Result</span>
+        </div>
+    </header>
+
+    <section class="panel reveal delay-1">
+        <div class="mode-toggle" role="tablist" aria-label="Input mode">
+            <button id="manualTab" class="active" onclick="setMode('manual')" role="tab" aria-selected="true">Manual Entry</button>
+            <button id="csvTab" onclick="setMode('csv')" role="tab" aria-selected="false">CSV Batch Upload</button>
+        </div>
+    </section>
+
+    <section class="panel reveal delay-2">
+        <h2 class="section-title">Data Used to Generate Output</h2>
+        <p class="section-subtitle">
+            The model needs {{ feature_count }} numeric fields per row. Use exactly these
+            column names when uploading a CSV file.
+        </p>
+
+        <div class="input-data-grid">
+            <div class="input-data-card">
+                <div class="input-data-label">Required Fields</div>
+                <div class="input-data-value">{{ feature_count }}</div>
+            </div>
+            <div class="input-data-card">
+                <div class="input-data-label">Input Type</div>
+                <div class="input-data-value">Numeric</div>
+            </div>
+            <div class="input-data-card">
+                <div class="input-data-label">Supported Input</div>
+                <div class="input-data-value">Manual / CSV</div>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <button class="btn ghost" type="button" onclick="downloadTemplateCSV()">
+                Download CSV Header Template
+            </button>
+        </div>
+
+        <details class="feature-list-box">
+            <summary>View all required column names</summary>
+            <div id="requiredFeatureList" class="feature-tags"></div>
+        </details>
+    </section>
+
+    <section id="manualSection" class="panel reveal delay-2">
+        <h2 class="section-title">Manual Feature Input</h2>
+        <p class="section-subtitle">Enter one record across all features, then run an ensemble prediction.</p>
+
+        <div class="toolbar">
+            <div class="search">
+                <input id="featureSearch" type="text" placeholder="Filter feature names" oninput="filterFeatures()">
+            </div>
+            <button class="btn ghost" type="button" onclick="fillZeros()">Fill All with 0</button>
+            <button class="btn ghost" type="button" onclick="clearManualForm()">Clear Inputs</button>
+        </div>
+
+        <form id="manualForm" onsubmit="predict(event)">
+            <div id="featureInputs" class="features-grid"></div>
+            <div class="form-footer">
+                <button id="predictBtn" class="btn primary" type="submit">Run Threat Detection</button>
+                <p class="note">All feature fields must be numeric values.</p>
+            </div>
+        </form>
+
+        <div id="predictError" class="alert hidden"></div>
+        <div id="manualResult" class="result-wrap hidden"></div>
+    </section>
+
+    <section id="csvSection" class="panel hidden">
+        <h2 class="section-title">CSV Dataset Analysis</h2>
+        <p class="section-subtitle">Upload a dataset and review row-level predictions with paginated results.</p>
+
+        <div class="csv-toolbar">
+            <label class="file-picker">
+                <input id="csvFile" type="file" accept=".csv" onchange="onFileSelected()">
+                <span id="fileLabel">Choose a CSV file to analyze</span>
+            </label>
+            <button id="analyzeBtn" class="btn primary" type="button" onclick="uploadCSV()">Analyze Dataset</button>
+            <button id="downloadBtn" class="btn ghost" type="button" onclick="downloadResults()" disabled>Download Results CSV</button>
+        </div>
+
+        <div class="filters-bar">
+            <label class="filter-pill">
+                <input id="attackOnlyFilter" type="checkbox" onchange="applyFilters()">
+                Show only Attack rows
+            </label>
+            <label class="filter-pill">
+                Risk level
+                <select id="riskFilter" onchange="applyFilters()">
+                    <option value="all">All</option>
+                    <option value="Low Risk">Low Risk</option>
+                    <option value="Medium Risk">Medium Risk</option>
+                    <option value="High Risk">High Risk</option>
+                </select>
+            </label>
+            <label class="filter-pill">
+                Search class
+                <input id="classSearch" type="text" placeholder="e.g. Normal Traffic" oninput="applyFilters()">
+            </label>
+            <button class="btn ghost" type="button" onclick="resetFilters()">Reset Filters</button>
+        </div>
+
+        <div id="csvError" class="alert hidden"></div>
+        <div id="csvSummary" class="summary-grid hidden"></div>
+
+        <div id="tableWrap" class="table-wrap hidden"></div>
+        <div id="pagination" class="pagination hidden"></div>
+    </section>
+</main>
+
+<script>
+const featureNames = {{ feature_names | tojson }};
+const featureCount = {{ feature_count }};
+
+const featureContainer = document.getElementById("featureInputs");
+const predictError = document.getElementById("predictError");
+const csvError = document.getElementById("csvError");
+const manualResult = document.getElementById("manualResult");
+const csvSummary = document.getElementById("csvSummary");
+const tableWrap = document.getElementById("tableWrap");
+const pagination = document.getElementById("pagination");
+const downloadBtn = document.getElementById("downloadBtn");
+const requiredFeatureList = document.getElementById("requiredFeatureList");
+const attackOnlyFilter = document.getElementById("attackOnlyFilter");
+const riskFilter = document.getElementById("riskFilter");
+const classSearch = document.getElementById("classSearch");
+
+let csvData = [];
+let page = 1;
+const rowsPerPage = 12;
+
+createFeatureInputs();
+renderRequiredFeatureList();
+
+function createFeatureInputs() {
+    const fragment = document.createDocumentFragment();
+
+    for (let i = 0; i < featureCount; i++) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "feature-item";
+        wrapper.dataset.name = String(featureNames[i] || "").toLowerCase();
+
+        const label = document.createElement("label");
+        label.htmlFor = `f${i}`;
+        label.textContent = featureNames[i] || `Feature ${i + 1}`;
+
+        const input = document.createElement("input");
+        input.type = "number";
+        input.step = "any";
+        input.id = `f${i}`;
+        input.placeholder = "Enter value";
+        input.required = true;
+
+        wrapper.appendChild(label);
+        wrapper.appendChild(input);
+        fragment.appendChild(wrapper);
+    }
+
+    featureContainer.appendChild(fragment);
+}
+
+function renderRequiredFeatureList() {
+    requiredFeatureList.innerHTML = featureNames
+        .map((name) => `<span class="feature-tag">${escapeHtml(String(name))}</span>`)
+        .join("");
+}
+
+function downloadTemplateCSV() {
+    const header = featureNames.map((field) => escapeCSV(field)).join(",");
+    const blob = new Blob([`${header}\n`], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "required_input_template.csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    URL.revokeObjectURL(url);
+}
+
+function setMode(mode) {
+    const manualSection = document.getElementById("manualSection");
+    const csvSection = document.getElementById("csvSection");
+    const manualTab = document.getElementById("manualTab");
+    const csvTab = document.getElementById("csvTab");
+
+    const useManual = mode === "manual";
+
+    manualSection.classList.toggle("hidden", !useManual);
+    csvSection.classList.toggle("hidden", useManual);
+
+    manualTab.classList.toggle("active", useManual);
+    csvTab.classList.toggle("active", !useManual);
+
+    manualTab.setAttribute("aria-selected", String(useManual));
+    csvTab.setAttribute("aria-selected", String(!useManual));
+}
+
+function filterFeatures() {
+    const query = document.getElementById("featureSearch").value.trim().toLowerCase();
+    const items = featureContainer.querySelectorAll(".feature-item");
+
+    items.forEach((item) => {
+        const isMatch = item.dataset.name.includes(query);
+        item.classList.toggle("hidden", !isMatch);
+    });
+}
+
+function clearManualForm() {
+    for (let i = 0; i < featureCount; i++) {
+        const input = document.getElementById(`f${i}`);
+        input.value = "";
+    }
+    hideError(predictError);
+}
+
+function fillZeros() {
+    for (let i = 0; i < featureCount; i++) {
+        const input = document.getElementById(`f${i}`);
+        input.value = "0";
+    }
+    hideError(predictError);
+}
+
+async function predict(event) {
+    event.preventDefault();
+    hideError(predictError);
+
+    const values = [];
+
+    for (let i = 0; i < featureCount; i++) {
+        const raw = document.getElementById(`f${i}`).value;
+        const value = Number.parseFloat(raw);
+
+        if (!Number.isFinite(value)) {
+            showError(predictError, `Feature ${i + 1} must be a valid number.`);
+            return;
+        }
+
+        values.push(value);
+    }
+
+    const predictBtn = document.getElementById("predictBtn");
+    predictBtn.disabled = true;
+    predictBtn.textContent = "Running...";
+
+    try {
+        const response = await fetch("/predict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ features: values })
+        });
+
+        const data = await response.json().catch(() => ({ error: "Invalid server response." }));
+
+        if (!response.ok || data.error) {
+            showError(predictError, data.error || "Prediction failed.");
+            manualResult.classList.add("hidden");
+            return;
+        }
+
+        renderPrediction(data);
+    } catch (error) {
+        showError(predictError, "Network error while requesting prediction.");
+        manualResult.classList.add("hidden");
+    } finally {
+        predictBtn.disabled = false;
+        predictBtn.textContent = "Run Threat Detection";
+    }
+}
+
+function renderPrediction(data) {
+    const models = [
+        { name: "Random Forest", label: data.RandomForest, conf: data.RF_Confidence },
+        { name: "XGBoost", label: data.XGBoost, conf: data.XGB_Confidence },
+        { name: "GAT Model 1", label: data.GAT_Model1, conf: data.GAT1_Confidence },
+        { name: "GAT Model 2", label: data.GAT_Model2, conf: data.GAT2_Confidence }
+    ];
+
+    const decision = data.FinalDecision || "Unknown";
+    const decisionRaw = data.FinalDecisionRaw || decision;
+    const risk = data.RiskLevel || deriveRiskLevel(decisionRaw);
+    const category = data.SecurityStatus || getDecisionCategory(decisionRaw);
+    const meaning = data.WhatThisMeans || getMeaningText(decisionRaw);
+    const status = data.SystemStatus || "Unknown";
+    const avgConfidence = Number.isFinite(Number(data.AverageConfidence))
+        ? Number(data.AverageConfidence).toFixed(2)
+        : "N/A";
+
+    const statusChipClass = mapStatusClass(status);
+    const riskChipClass = mapRiskClass(risk);
+    const categoryChipClass = category === "Safe"
+        ? "ok"
+        : category === "Suspicious"
+            ? "warn"
+            : "danger";
+
+    const modelCards = models.map((model) => {
+        const confidence = clampPercentage(model.conf);
+        return `
+            <div class="model-card">
+                <div class="model-top">
+                    <span class="model-name">${escapeHtml(model.name)}</span>
+                    <span>${confidence.toFixed(2)}%</span>
+                </div>
+                <div class="model-label">${escapeHtml(String(model.label || "Unknown"))}</div>
+                <div class="meter"><span style="width:${confidence}%"></span></div>
+            </div>
+        `;
+    }).join("");
+
+    manualResult.innerHTML = `
+        <div class="decision">
+            <p class="eyebrow">Ensemble Decision</p>
+            <h3>${escapeHtml(String(decision))}</h3>
+            <div class="chips">
+                <span class="chip ${categoryChipClass}">${escapeHtml(category)}</span>
+                <span class="chip ${statusChipClass}">${escapeHtml(String(status))}</span>
+                <span class="chip ${riskChipClass}">${escapeHtml(String(risk))}</span>
+                <span class="chip neutral">Average confidence ${avgConfidence}%</span>
+            </div>
+            <p class="decision-note">${escapeHtml(meaning)}</p>
+        </div>
+        <div class="model-grid">${modelCards}</div>
+    `;
+
+    manualResult.classList.remove("hidden");
+}
+
+function mapStatusClass(status) {
+    const normalized = String(status).toLowerCase();
+    if (normalized.includes("safe")) return "ok";
+    if (normalized.includes("warning")) return "warn";
+    return "danger";
+}
+
+function mapRiskClass(risk) {
+    const normalized = String(risk).toLowerCase();
+    if (normalized.includes("low")) return "ok";
+    if (normalized.includes("medium")) return "warn";
+    return "danger";
+}
+
+function deriveRiskLevel(decision) {
+    const value = normalizeClassName(decision);
+    if (value === "benign" || value === "normaltraffic") return "Low Risk";
+    if ([
+        "portscan",
+        "bruteforce",
+        "infiltration",
+        "ftppatator",
+        "sshpatator",
+        "webattackbruteforce",
+        "webloginbruteforceattempt"
+    ].includes(value)) return "Medium Risk";
+    return "High Risk";
+}
+
+function onFileSelected() {
+    const file = document.getElementById("csvFile").files[0];
+    document.getElementById("fileLabel").textContent = file ? file.name : "Choose a CSV file to analyze";
+    hideError(csvError);
+}
+
+async function uploadCSV() {
+    hideError(csvError);
+
+    const file = document.getElementById("csvFile").files[0];
+    if (!file) {
+        showError(csvError, "Please select a CSV file.");
+        return;
+    }
+
+    const analyzeBtn = document.getElementById("analyzeBtn");
+    analyzeBtn.disabled = true;
+    analyzeBtn.textContent = "Analyzing...";
+
+    try {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response = await fetch("/upload", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json().catch(() => ({ error: "Invalid server response." }));
+
+        if (!response.ok || data.error) {
+            showError(csvError, data.error || "Upload failed.");
+            csvData = [];
+            refreshCSVViews();
+            return;
+        }
+
+        csvData = Array.isArray(data.results) ? data.results : [];
+        page = 1;
+        refreshCSVViews();
+    } catch (error) {
+        showError(csvError, "Network error while uploading CSV.");
+        csvData = [];
+        refreshCSVViews();
+    } finally {
+        analyzeBtn.disabled = false;
+        analyzeBtn.textContent = "Analyze Dataset";
+    }
+}
+
+function refreshCSVViews() {
+    if (!csvData.length) {
+        csvSummary.classList.add("hidden");
+        tableWrap.classList.add("hidden");
+        pagination.classList.add("hidden");
+        downloadBtn.disabled = true;
+        return;
+    }
+
+    renderSummary();
+    renderTable();
+    renderPagination();
+    downloadBtn.disabled = getFilteredRows().length === 0;
+}
+
+function renderSummary() {
+    const filteredRows = getFilteredRows();
+    const safeCount = filteredRows.filter((row) => (row.SecurityStatus || getDecisionCategory(row.FinalDecisionRaw || row.FinalDecision)) === "Safe").length;
+    const suspiciousCount = filteredRows.filter((row) => (row.SecurityStatus || getDecisionCategory(row.FinalDecisionRaw || row.FinalDecision)) === "Suspicious").length;
+    const attackCount = filteredRows.filter((row) => (row.SecurityStatus || getDecisionCategory(row.FinalDecisionRaw || row.FinalDecision)) === "Attack").length;
+
+    csvSummary.innerHTML = `
+        <div class="summary-card">
+            <div class="summary-title">Rows Shown / Total</div>
+            <div class="summary-value">${filteredRows.length} / ${csvData.length}</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-title">Safe</div>
+            <div class="summary-value">${safeCount}</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-title">Suspicious</div>
+            <div class="summary-value">${suspiciousCount}</div>
+        </div>
+        <div class="summary-card">
+            <div class="summary-title">Attack</div>
+            <div class="summary-value">${attackCount}</div>
+        </div>
+    `;
+    csvSummary.classList.remove("hidden");
+}
+
+function renderTable() {
+    const filteredRows = getFilteredRows();
+    const totalPages = Math.max(1, Math.ceil(filteredRows.length / rowsPerPage));
+    if (page > totalPages) page = totalPages;
+
+    if (!filteredRows.length) {
+        tableWrap.innerHTML = `<div class="empty-state">No rows match the selected filters.</div>`;
+        tableWrap.classList.remove("hidden");
+        return;
+    }
+
+    const start = (page - 1) * rowsPerPage;
+    const rows = filteredRows.slice(start, start + rowsPerPage);
+
+    const body = rows.map((row) => {
+        const decision = String(row.FinalDecision || "Unknown");
+        const decisionRaw = String(row.FinalDecisionRaw || decision);
+        const category = String(row.SecurityStatus || getDecisionCategory(decisionRaw));
+        const badgeClass = mapDecisionBadge(category);
+        const riskLevel = String(row.RiskLevel || deriveRiskLevel(decisionRaw));
+        const meaning = String(row.WhatThisMeans || getMeaningText(decisionRaw));
+        return `
+            <tr>
+                <td>${escapeHtml(String(row.Row ?? ""))}</td>
+                <td>
+                    <span class="badge ${badgeClass}" title="Technical class: ${escapeHtml(decisionRaw)}">
+                        ${escapeHtml(category)}
+                    </span>
+                </td>
+                <td>
+                    <div class="meaning-text">${escapeHtml(meaning)}</div>
+                </td>
+                <td>
+                    <details class="technical-details">
+                        <summary>View technical details</summary>
+                        <div class="technical-details-content">
+                            <div><b>Final class:</b> ${escapeHtml(decision)}</div>
+                            <div><b>Technical class:</b> ${escapeHtml(decisionRaw)}</div>
+                            <div><b>Risk:</b> ${escapeHtml(riskLevel)}</div>
+                            <div><b>RF:</b> ${escapeHtml(String(row.RF_Raw || row.RF || "-"))}</div>
+                            <div><b>XGB:</b> ${escapeHtml(String(row.XGB_Raw || row.XGB || "-"))}</div>
+                            <div><b>GAT1:</b> ${escapeHtml(String(row.GAT_Model1Raw || row.GAT_Model1 || "-"))}</div>
+                            <div><b>GAT2:</b> ${escapeHtml(String(row.GAT_Model2Raw || row.GAT_Model2 || "-"))}</div>
+                        </div>
+                    </details>
+                </td>
+            </tr>
+        `;
+    }).join("");
+
+    tableWrap.innerHTML = `
+        <table>
+            <thead>
+                <tr>
+                    <th>Row</th>
+                    <th>Security Status</th>
+                    <th>What This Means</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>${body}</tbody>
+        </table>
+    `;
+
+    tableWrap.classList.remove("hidden");
+}
+
+function renderPagination() {
+    const totalPages = Math.ceil(getFilteredRows().length / rowsPerPage);
+
+    if (totalPages <= 1) {
+        pagination.classList.add("hidden");
+        return;
+    }
+
+    pagination.innerHTML = `
+        <button class="btn ghost" type="button" onclick="gotoPage(${page - 1})" ${page <= 1 ? "disabled" : ""}>Previous</button>
+        <span>Page ${page} of ${totalPages}</span>
+        <button class="btn ghost" type="button" onclick="gotoPage(${page + 1})" ${page >= totalPages ? "disabled" : ""}>Next</button>
+    `;
+
+    pagination.classList.remove("hidden");
+}
+
+function gotoPage(nextPage) {
+    const totalPages = Math.ceil(getFilteredRows().length / rowsPerPage);
+    if (nextPage < 1 || nextPage > totalPages) return;
+
+    page = nextPage;
+    renderTable();
+    renderPagination();
+}
+
+function getFilteredRows() {
+    const searchQuery = classSearch.value.trim().toLowerCase();
+    const selectedRisk = riskFilter.value;
+    const onlyAttack = attackOnlyFilter.checked;
+
+    return csvData.filter((row) => {
+        const decisionRaw = String(row.FinalDecisionRaw || row.FinalDecision || "");
+        const decisionSimple = String(row.FinalDecision || "");
+        const category = String(row.SecurityStatus || getDecisionCategory(decisionRaw));
+        const risk = String(row.RiskLevel || deriveRiskLevel(decisionRaw));
+
+        if (onlyAttack && category !== "Attack") return false;
+        if (selectedRisk !== "all" && risk !== selectedRisk) return false;
+
+        if (searchQuery) {
+            const haystack = `${decisionSimple} ${decisionRaw}`.toLowerCase();
+            if (!haystack.includes(searchQuery)) return false;
+        }
+
+        return true;
+    });
+}
+
+function applyFilters() {
+    if (!csvData.length) return;
+    page = 1;
+    renderSummary();
+    renderTable();
+    renderPagination();
+    downloadBtn.disabled = getFilteredRows().length === 0;
+}
+
+function resetFilters() {
+    attackOnlyFilter.checked = false;
+    riskFilter.value = "all";
+    classSearch.value = "";
+    applyFilters();
+}
+
+function getDecisionCategory(decision) {
+    const risk = deriveRiskLevel(decision);
+    if (risk === "Low Risk") return "Safe";
+    if (risk === "Medium Risk") return "Suspicious";
+    return "Attack";
+}
+
+function mapDecisionBadge(category) {
+    if (category === "Safe") return "safe";
+    if (category === "Suspicious") return "warning";
+    return "attack";
+}
+
+function getMeaningText(decision) {
+    const normalized = normalizeClassName(decision);
+
+    if (normalized === "benign" || normalized === "normaltraffic") {
+        return "Looks normal. No immediate action is required.";
+    }
+
+    if (["portscan"].includes(normalized)) {
+        return "Possible port scanning. Review source IP behavior and block if needed.";
+    }
+
+    if ([
+        "bruteforce",
+        "ftppatator",
+        "sshpatator",
+        "webattackbruteforce",
+        "webloginbruteforceattempt"
+    ].includes(normalized)) {
+        return "Repeated login attempts detected. Review authentication logs and lockout policy.";
+    }
+
+    if (["infiltration"].includes(normalized)) {
+        return "Possible unauthorized access pattern. Investigate internal host activity.";
+    }
+
+    if ([
+        "ddos",
+        "doshulk",
+        "dosgoldeneye",
+        "dosslowloris",
+        "dosslowhttptest",
+        "bot"
+    ].includes(normalized)) {
+        return "Traffic pattern may disrupt services. Check spikes and apply traffic controls.";
+    }
+
+    if (["webattacksqlinjection", "webattackxss", "heartbleed"].includes(normalized)) {
+        return "Possible exploit attempt. Review WAF, app logs, and patch status immediately.";
+    }
+
+    return "Potential malicious behavior detected. Investigate logs and isolate suspicious endpoints.";
+}
+
+function downloadResults() {
+    const rowsForExport = getFilteredRows();
+    if (!rowsForExport.length) return;
+
+    const headers = [
+        "Row",
+        "SecurityStatus",
+        "RiskLevel",
+        "WhatThisMeans",
+        "RF",
+        "RF_Raw",
+        "XGB",
+        "XGB_Raw",
+        "GAT_Model1",
+        "GAT_Model1Raw",
+        "GAT_Model2",
+        "GAT_Model2Raw",
+        "FinalDecision",
+        "FinalDecisionRaw"
+    ];
+    const lines = [headers.join(",")];
+
+    for (const row of rowsForExport) {
+        const decisionRaw = row.FinalDecisionRaw || row.FinalDecision || "";
+        const exportRow = {
+            ...row,
+            SecurityStatus: row.SecurityStatus || getDecisionCategory(decisionRaw),
+            RiskLevel: row.RiskLevel || deriveRiskLevel(decisionRaw),
+            WhatThisMeans: row.WhatThisMeans || getMeaningText(decisionRaw)
+        };
+        const line = headers
+            .map((field) => escapeCSV(exportRow[field]))
+            .join(",");
+        lines.push(line);
+    }
+
+    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "prediction_results.csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    URL.revokeObjectURL(url);
+}
+
+function showError(target, message) {
+    target.textContent = message;
+    target.classList.remove("hidden");
+}
+
+function hideError(target) {
+    target.textContent = "";
+    target.classList.add("hidden");
+}
+
+function escapeCSV(value) {
+    const text = String(value ?? "");
+    return `"${text.replace(/"/g, '""')}"`;
+}
+
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+function normalizeClassName(value) {
+    return String(value || "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "");
+}
+
+function clampPercentage(value) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) return 0;
+    if (number < 0) return 0;
+    if (number > 100) return 100;
+    return number;
+}
+</script>
+</body>
+</html>
